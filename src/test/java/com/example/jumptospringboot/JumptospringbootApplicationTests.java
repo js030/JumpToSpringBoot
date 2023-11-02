@@ -2,7 +2,9 @@ package com.example.jumptospringboot;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.example.jumptospringboot.entity.Answer;
 import com.example.jumptospringboot.entity.Question;
+import com.example.jumptospringboot.repository.AnswerRepository;
 import com.example.jumptospringboot.repository.QuestionRepository;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,6 +21,8 @@ class JumptospringbootApplicationTests {
 
     @Autowired
     private QuestionRepository questionRepository;
+    @Autowired
+    private AnswerRepository answerRepository;
 
     @Test
     @DisplayName("질문 저장")
@@ -73,6 +77,40 @@ class JumptospringbootApplicationTests {
         List<Question> qList = questionRepository.findBySubjectLike("sbb%");
         Question q = qList.get(0);
         assertEquals("sbb가 무엇인가요", q.getSubject());
+    }
+
+    @Test
+    @DisplayName("질문 아이디로 조회한 후 있을 시 가져와서 값 수정 후 저장하는 테스트")
+    void getByIdAndEdit(){
+        Optional<Question> oq = questionRepository.findById(1);
+        assertTrue(oq.isPresent());
+        Question q = oq.get();
+        q.setSubject("수정된 제목");
+        questionRepository.save(q);
+    }
+
+    @Test
+    @DisplayName("질문 삭제 테스트")
+    void deleteQuestion(){
+        assertEquals(4, questionRepository.count());
+        Optional<Question> oq = questionRepository.findById(1);
+        assertTrue(oq.isPresent());
+        Question q = oq.get();
+        questionRepository.delete(q);
+        assertEquals(3, this.questionRepository.count());
+    }
+
+    @Test
+    void testJpa(){
+        Optional<Question> oq = questionRepository.findById(2);
+        assertTrue(oq.isPresent());
+        Question q = oq.get();
+
+        Answer a = new Answer();
+        a.setContent("네 자동으로 생성됩니다.");
+        a.setQuestion(q);
+        a.setCreateDate(LocalDateTime.now());
+        answerRepository.save(a);
     }
 
     @Test
